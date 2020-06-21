@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="css/base.css">
+		<link rel="stylesheet" type="text/css" href="css/iconfont.css">
+		<link rel="stylesheet" type="text/css" href="layui/css/layui.css">
+		<link rel="stylesheet" type="text/css" href="css/popup.css"/>
+		<link rel="stylesheet" type="text/css" href="css/alert.css"/>
+		<script type="text/javascript" src="layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.css">
+		<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/vue.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/popup.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body>
+			<div class="cBody">
+				<button id="addCategory" class="layui-btn" style="float: right; margin-right: 5px;margin-bottom: 10px;">点击添加类目</button>
+			<div id="categoryList">
+			<table class="layui-table">
+				<thead>
+				<tr>
+						<th>序号</th>
+						<th>类目名称</th>
+				</tr>
+				</thead>
+				<tbody  id="purchaseNote">
+					 <tr v-for="site in sites">
+					          	<td v-text="sites.indexOf(site)+1"></td>
+					          	<td v-text="site.categoryName"></td>
+					  </tr>
+				</tbody>
+			</table>
+			</div>
+			</div>
+			<!-- 类目信息弹框 -->
+			<div class="modal addfade" id="addmodal">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h4>添加类目</h4>
+						</div>
+						<div class="modal-body">
+							<p>
+								类目名称：<input type="text" id="categoryName"/>
+							</p>
+						</div>
+						<div class="modal-footer">
+							<button class="addbtn_ok">确定</button>
+							<button class="addbtn_no">取消</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</body><!-- body-end  -->
+		<script type="text/javascript">
+			var Popup = new Popup();
+			new Vue({
+					el: '#categoryList',
+					        data: {
+					            sites: [],
+					        },
+					        created: function () {
+					　　　　　　//为了在内部函数能使用外部函数的this对象，要给它赋值了一个名叫self的变量。
+					            var self = this;
+					            $.ajax({
+					                url: 'http://localhost:8082/findAllCategroy',
+					                type: 'get',
+					                data: {},
+					                dataType: 'json'
+					            }).then(function (res) {
+					                self.sites = res;
+					            }).fail(function () {
+								Popup.alert("系统异常");
+					            })
+					        }	
+			    });
+					$("#addCategory").click(function(){
+						$(".addfade").fadeIn(300)
+						$(document).on("click",".addbtn_ok",function(){
+							var categoryNameVal = $("#categoryName").val();
+							$.ajax({
+												url: 'http://localhost:8082/addCategoryName',
+												type: 'get',
+												data: {
+													categoryName:categoryNameVal
+												},
+												dataType: 'json',
+												success:function(res){
+														if(res==0){
+															Popup.alert("系统提示","输入不能为空");
+														}else{
+															Popup.alert("系统提示","添加成功");
+															window.location.href="categoryManage.html";
+														}
+												},
+												error:
+												function(){
+													Popup.alert("系统提示","系统异常");
+												}
+											})
+						});
+						$(document).on("click",".addbtn_no",function(){
+								$(".addfade").fadeOut(300)
+						})
+					})
+		</script>
+		
+</html>

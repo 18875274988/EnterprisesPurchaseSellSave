@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="css/base.css">
+		<link rel="stylesheet" type="text/css" href="css/iconfont.css">
+		<link rel="stylesheet" type="text/css" href="layui/css/layui.css">
+		<link rel="stylesheet" type="text/css" href="css/popup.css"/>
+		<script type="text/javascript" src="layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.css">
+		<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/vue.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/popup.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/myCookie.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body>
+			<div class="cBody">
+				<div class="console">
+				<div class="layui-form-item">
+				<div class="layui-input-inline">
+				<input type="text" placeholder="输入入库单号" class="layui-input" id="SreachProduct">
+				</div>
+				<button id="search" class="layui-btn">检索</button>
+				</div>
+				</div>
+			<div id="productList">
+			<table class="layui-table">
+				<thead>
+				<tr>
+						<th>序号</th>
+						<th>出库单号</th>
+						<th>出库单开始时间</th>
+						<th>查看详情</th>
+				</tr>
+				</thead>
+				<tbody  id="productlist">
+					 <tr v-for="site in sites">
+					          	<td v-text="site.warehouseId" style="display: none;"></td>
+					          	<td v-text="sites.indexOf(site)+1"></td>
+					          	<td v-text="site.warehouseNo"></td>
+					          	<td v-text="site.warehouseStarttime"></td>
+					          	<td>
+					          		<button class="layui-btn" @click="sumPurchase(site.warehouseId)"><a href="OutboundParticulars_show.html"  style="color: white;">详情</a></button>
+					          	</td>
+					  </tr>
+				</tbody>
+			</table>
+			</div>
+			</div>
+		</body><!-- body-end  -->
+<script>
+			var Popup = new Popup();
+			new Vue({
+			        el: '#productList',
+			        data: {
+			            sites: []
+			        },
+			        created: function () {
+			　　　　　　//为了在内部函数能使用外部函数的this对象，要给它赋值了一个名叫self的变量。
+			            var self = this;
+			            $.ajax({
+			                url: 'http://localhost:8082/findAllWarehouseOut',
+			                type: 'get',
+			                data: {},
+			                dataType: 'json'
+			            }).then(function (res) {
+			　　　　　　　　　　//把从json获取的数据赋值给数组
+			                self.sites = res;
+			            }).fail(function () {
+						Popup.alert("系统提示","系统异常");
+			            })
+			        }
+			    });
+					
+			$("#search").click(function(){
+				if($("#SreachProduct").val()==''){
+					$("#productlist tr").each(function(){
+						$(this).show();
+					  })
+				}else{
+					var i=0;
+					 $("#productlist tr").each(function(){
+					      var text = $(this).children("td:eq(2)").text();
+								if($("#SreachProduct").val()!=text){
+									$(this).hide();
+								}else if($("#SreachProduct").val()==text){
+									$(this).show();
+									i++;
+								}
+					    })
+						if(i<=0){
+							Popup.alert("系统提示","无查询结果");
+							$("#productlist tr").each(function(){
+								$(this).show();
+							 })
+						}
+				}
+			});
+			
+			function sumPurchase(idval){
+		localStorage.setItem('id',JSON.stringify(idval));
+		}
+	</script>
+</html>

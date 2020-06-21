@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="css/base.css">
+		<link rel="stylesheet" type="text/css" href="css/iconfont.css">
+		<link rel="stylesheet" type="text/css" href="layui/css/layui.css">
+		<link rel="stylesheet" type="text/css" href="css/popup.css"/>
+		<link rel="stylesheet" type="text/css" href="css/alert.css"/>
+		<script type="text/javascript" src="layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.css">
+		<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/vue.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/popup.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/myCookie.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body>
+			<div class="cBody">
+				<div class="console">
+				<div class="layui-form-item">
+				<div class="layui-input-inline">
+				<input type="text" placeholder="输入商品名称" class="layui-input" id="SreachEpsProduct">
+				</div>
+				<button id="search" class="layui-btn">检索</button>
+				<button id="addProduct" class="layui-btn" style="float: right; margin-right: 15px;"><a href="addProduct.html" target="rightMain" style="color: white;">添加商品</a></button>
+				<button id="addCategory" class="layui-btn" style="float: right; margin-right: 15px;"><a href="categoryManage.html" target="rightMain" style="color: white;">商品类目管理</a></button>
+				</div>
+				</div>
+			<div id="productList">
+			<table class="layui-table">
+				<thead>
+				<tr>
+						<th>序号</th>
+						<th>商品名称</th>
+						<th>商品数量</th>
+						<th>商品价格</th>
+						<th>创建时间</th>
+						<th>商品来源</th>
+						<th>商品种类</th>
+						<th>状态</th>
+						<th>采购价（单位元）</th>
+						<th>操作</th>
+				</tr>
+				</thead>
+				<tbody  id="EpsProductlist">
+					 <tr v-for="site in sites">
+											<td v-text="site.id" style="display: none;"></td>
+					          	<td v-text="sites.indexOf(site)+1"></td>
+					          	<td v-text="site.productName"></td>
+					          	<td v-text="site.productCount"></td>
+					          	<td v-text="site.productPrice"></td>
+											<td v-text="site.productCreatetime"></td>
+											<td v-text="site.productFrom"></td>
+											<td v-text="site.productCategory"></td>
+											<td v-if="site.productState==1" style="color: red; font-weight: 1000;">警告</td>
+											<td v-else-if="site.productState==0" style="color: green; font-weight: 1000;">正常</td>
+											<td v-else-if="site.productState==null" style="color: green; font-weight: 1000;">正常</td>
+											<td v-text="site.productPurchasePrice"></td>
+								<td>
+									<button class="layui-btn layui-btn-xs" @click="addShoppingCart(site.id)">修改预警值</button>
+								</td>
+					  </tr>
+				</tbody>
+			</table>
+			</div>
+			</div>
+			<!-- 客户信息弹框 -->
+			<div class="modal addfade" id="addmodal">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h4>预警值修改</h4>
+						</div>
+						<div class="modal-body">
+							<p>
+								预警值：<input type="text" id="prewarning" v-model="prewarningValue"/>
+							</p>
+						</div>
+						<div class="modal-footer">
+							<button class="addbtn_ok">确定</button>
+							<button class="addbtn_no">取消</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</body><!-- body-end  -->
+		<script>
+			var Popup = new Popup();
+			new Vue({
+			        el: '#productList',
+			        data: {
+			            sites: []
+			        },
+			        created: function () {
+			　　　　　　//为了在内部函数能使用外部函数的this对象，要给它赋值了一个名叫self的变量。
+			            var self = this;
+			            $.ajax({
+			                url: 'http://localhost:8082/findAllEpsProduct',
+			                type: 'get',
+			                data: {},
+			                dataType: 'json'
+			            }).then(function (res) {
+			　　　　　　　　　　//把从json获取的数据赋值给数组
+			                self.sites = res;
+			            }).fail(function () {
+											Popup.alert("系统提示","系统异常");
+			            })
+			        }
+			    });
+					$("#search").click(function(){
+						if($("#SreachEpsProduct").val()==''){
+							$("#EpsProductlist tr").each(function(){
+								$(this).show();
+							  })
+						}else{
+							var i=1;
+							 $("#EpsProductlist tr").each(function(){
+							      var text = $(this).children("td:eq(2)").text();
+								 if($("#SreachEpsProduct").val()==text){
+									 i++;
+									 $(this).prevAll().hide() //获取指定元素的前边所有的同级元素。
+									 $(this).nextAll().hide() //获取指定元素后边的所有同级元素
+								 } 
+							    })
+								if(i<=1){
+									
+									Popup.alert("系统提示","无查询结果");
+									$("#EpsProductlist tr").each(function(){
+										$(this).show();
+									 })
+								}
+						}
+					});
+					function addShoppingCart(idval){
+						new Vue({
+						        el: '#prewarning',
+						        data: {
+												prewarningValue:{}
+						        },
+						        created: function () {
+											var self = this;
+						            $.ajax({
+						                url: 'http://localhost:8082/findEpsPrewarningById',
+						                type: 'get',
+						                data: {productId:idval},
+						                dataType: 'json'
+						            }).then(function (res) {
+													self.prewarningValue=res;
+						            }).fail(function () {
+												Popup.alert("系统提示","系统异常");
+						            })
+						        }
+						    });
+						$(".addfade").fadeIn(300)
+						$(document).on("click",".addbtn_ok",function(){
+								$(".addfade").fadeOut(300)
+								$('#addmodal').find("input").each(function(){
+								})
+								var prewarningVal = $("#prewarning").val();
+								$.getJSON('http://localhost:8082/updateprewarningById', {productId:idval,
+								prewarningValue:prewarningVal},
+								function(res){
+											Popup.alert("系统提示","修改成功",function(){
+												window.location.href="productLibrary_list.html";
+											})
+									 }
+							);
+					})
+					$(document).on("click",".addbtn_no",function(){
+							$(".addfade").fadeOut(300)
+							window.location.href="productLibrary_list.html";
+					})
+			}
+		</script>
+</html>

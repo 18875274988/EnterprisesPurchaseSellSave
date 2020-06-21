@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+		<!-- Google Chrome Frame也可以让IE用上Chrome的引擎: -->
+		<meta name="renderer" content="webkit">
+		<!--国产浏览器高速模式-->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>权限管理</title>
+
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="css/base.css">
+		<link rel="stylesheet" type="text/css" href="css/iconfont.css">
+		<link rel="stylesheet" type="text/css" href="layui/css/layui.css">
+		<link rel="stylesheet" type="text/css" href="css/popup.css"/>
+		<script type="text/javascript" src="layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.css">
+		<script src="js/vue.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/popup.js" type="text/javascript" charset="utf-8"></script>
+		<!-- 公共样式 结束 -->
+
+	</head>
+
+	<body>
+		<div class="cBody">
+						<div class="layui-input-inline">
+							<input id="search" type="text" name="name" required lay-verify="required" placeholder="用户名" autocomplete="off" class="layui-input">
+						</div>
+						<button class="layui-btn"  id="searchbutton">检索</button>
+			<div id="userList">
+			<table class="layui-table">
+				<thead>
+					<tr>
+						<th>序号</th>
+						<th>用户名</th>
+						<th>密码</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody id="usertbody">
+					<tr v-for="site in sites">
+						<td v-text="site.id" style="display: none;" ></td>
+						<td v-text="sites.indexOf(site)+1"></td>
+						<td v-text="site.username"></td>
+						<td>
+							<select>
+								<option   >用户密码</option>
+								<option   v-text="site.password"></option>
+							</select>
+						</td>
+						<td>
+							<select v-bind:id="site.id">
+								<option value="1" id="salesman" v-if="site.identity==1">销售部</option>
+								<option value="2" id="buyer" v-else-if="site.identity==2">采购部</option>
+								<option value="3" id="storeKeeper " v-else-if="site.identity==3">仓库部</option>
+								<option value="4" id="quaestor" v-else-if="site.identity==4">财务部</option>
+								<option value="null" id="quaestor" v-else>无权限</option>
+								<option value="1" id="salesman">销售部</option>
+								<option value="2" id="buyer">采购部</option>
+								<option value="3" id="storeKeeper ">仓库部</option>
+								<option value="4" id="quaestor">财务部</option>
+								<option value="null" id="quaestor">无权限</option>
+							</select>
+							<button class="layui-btn layui-btn-xs" @click="update(site.id)">确定</button>
+							<button class="layui-btn layui-btn-xs layui-btn-normal" @click="deleteuser(site.id)">删除</button>
+						</td>
+					</tr>
+			</table>
+		</div>
+	</body>
+	<script type="text/javascript">
+		var Popup = new Popup();
+		new Vue({
+				el: '#userList',
+				        data: {
+				            sites: [],
+				        },
+				        created: function () {
+				　　　　　　//为了在内部函数能使用外部函数的this对象，要给它赋值了一个名叫self的变量。
+				            var self = this;
+				            $.ajax({
+				                url: 'http://localhost:8082/findAlluser',
+				                type: 'get',
+				                data: {},
+				                dataType: 'json'
+				            }).then(function (res) {
+				                self.sites = res;
+				            }).fail(function () {
+							alert("系统异常");
+				            })
+				        }	
+		    });
+			function update(idval){
+				var identityval = $("#"+idval).val();
+				$.ajax({
+					url: 'http://localhost:8082/updateIdentity',
+					type: 'get',
+					data: {
+						id:idval,
+						identity:identityval
+					},
+					dataType: 'json',
+					success:function(res){
+						if(res==1){
+							Popup.toast("修改成功",3);
+								// window.location.reload();//刷新当前页面.
+						}else{
+							Popup.alert("系统提示","系统错误");
+						}
+					},
+					error:
+					function(){
+						Popup.alert("系统提示","系统异常");
+					}
+				})
+			}
+			
+			function deleteuser(idval){
+			Popup.confirm("系统提示","确定要删除吗?",function deleteuserson(){
+				$.ajax({
+					url: 'http://localhost:8082/deleteUser',
+					type: 'get',
+					data: {
+						id:idval,
+					},
+					dataType: 'json',
+					success:function(res){
+						if(res==1){
+							window.location.reload();//刷新当前页面.
+						}else{
+							Popup.alert("系统提示","系统错误");
+						}
+						
+					},
+					error:
+					function(){
+						Popup.alert("系统提示","系统异常");
+					}
+				})
+			})
+			}
+			$("#searchbutton").click(function(){
+				if($("#search").val()==''){
+					$("#usertbody tr").each(function(){
+						$(this).show();
+					  })
+				}else{
+					var i=1;
+					 $("#usertbody tr").each(function(){
+					      var text = $(this).children("td:eq(2)").text();
+						 if($("#search").val()==text){
+							 i++;
+							 $(this).prevAll().hide() //获取指定元素的前边所有的同级元素。
+							 $(this).nextAll().hide() //获取指定元素后边的所有同级元素
+						 } 
+					    })
+						if(i<=1){
+							Popup.toast("没有该用户信息",3);
+							$("#usertbody tr").each(function(){
+								$(this).show();
+							 })
+						}
+				}
+			});
+	</script>
+</html>

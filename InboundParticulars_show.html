@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="css/base.css">
+		<link rel="stylesheet" type="text/css" href="css/iconfont.css">
+		<link rel="stylesheet" type="text/css" href="layui/css/layui.css">
+		<link rel="stylesheet" type="text/css" href="css/popup.css"/>
+		<link rel="stylesheet" type="text/css" href="css/alert.css"/>
+		<script type="text/javascript" src="layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.css">
+		<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/vue.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/popup.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body>
+			<div class="cBody">
+				<button id="sumbOrder" class="layui-btn" style="float: right; margin-right: 5px;margin-bottom: 10px;"><a href="Inbound_list.html" style="color: white;">>>>点击返回</a></button>
+			<div id="productList">
+			<table class="layui-table">
+				<thead>
+				<tr>
+						<th>序号</th>
+						<th>商品名称</th>
+						<th>商品数量</th>
+						<th>采购价格</th>
+						<th>供应商信息</th>
+						<th>操作</th>
+				</tr>
+				</thead>
+				<tbody  id="purchaseNote">
+					 <tr v-for="site in sites">
+											<td v-text="sites.warehouseId" style="display: none;"></td>
+					          	<td v-text="sites.indexOf(site)+1"></td>
+					          	<td v-text="site.productName"></td>
+					          	<td v-text="site.productCount"></td>
+											<td v-text="site.productPurchasePrice"></td>
+											<td v-text="site.supplierInfo"></td>
+											<td>
+													<button class="layui-btn layui-btn-xs" @click="addWarehouse(site)">入库</button>
+											</td>
+					  </tr>
+				</tbody>
+			</table>
+			</div>
+			</div>
+			<!-- 商品信息弹框 -->
+			<div class="modal addfade" id="addmodal">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h4>商品信息</h4>
+						</div>
+						<div class="modal-body">
+								<div id="categoryList">
+									选择分类：
+								<select  style="width: 180px;height: 35px;" id="categoryNameSelect">
+									<option v-for="item in list" :value="item.categoryName">{{item.categoryName}}</option>
+								</select>
+								</div>
+						</div>
+						<div class="modal-footer">
+							<button class="addbtn_ok">确定</button>
+							<button class="addbtn_no">取消</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</body><!-- body-end  -->
+		<script type="text/javascript">
+			var Popup = new Popup();
+			var purchaseOrderIdval = JSON.parse(localStorage.id);
+		//查询分类
+	new Vue({
+			el: '#categoryList',
+			        data: {
+			            list: [],
+			        },
+			        created: function () {
+			　　　　　　//为了在内部函数能使用外部函数的this对象，要给它赋值了一个名叫self的变量。
+			            var self = this;
+			            $.ajax({
+			                url: 'http://localhost:8082/findAllCategroy',
+			                type: 'get',
+			                data: {id:purchaseOrderIdval},
+			                dataType: 'json'
+			            }).then(function (res) {
+			                self.list = res;
+			            }).fail(function () {
+						Popup.alert("系统提示","系统异常");
+			            })
+			        }	
+	    });
+		
+			new Vue({
+					el: '#productList',
+					        data: {
+					            sites: [],
+					        },
+					        created: function () {
+					　　　　　　//为了在内部函数能使用外部函数的this对象，要给它赋值了一个名叫self的变量。
+					            var self = this;
+					            $.ajax({
+					                url: 'http://localhost:8082/finWarehouseEnterInfoById',
+					                type: 'get',
+					                data: {id:purchaseOrderIdval},
+					                dataType: 'json'
+					            }).then(function (res) {
+					                self.sites = res;
+					            }).fail(function () {
+								Popup.alert("系统提示","系统异常");
+					            })
+					        }	
+			    });
+								function addWarehouse(site){
+									$(".addbtn_ok").click(function(){
+										var categoryVal=$("#categoryNameSelect").val();
+										$.getJSON('http://localhost:8082/PutInStorge', {
+											warehouseId:site.warehouseId,
+											productName:site.productName,
+											productCount:site.productCount,
+											productPurchasePrice:site.productPurchasePrice,
+											supplierInfo:site.supplierInfo,
+											category:categoryVal
+											},
+											function(res){
+														Popup.alert("系统提示","成功入库",function(){
+															window.location.href="InboundParticulars_show.html";
+														})
+												 }
+										);
+									});
+									$(".addfade").fadeIn(300);
+									$(document).on("click",".addbtn_no",function(){
+											$(".addfade").fadeOut(300)
+									})
+								}
+								
+								
+		</script>
+		
+</html>

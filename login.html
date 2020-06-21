@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>登录注册</title>
+
+<link rel="stylesheet" href="css/font-awesome-4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="css/style.css">
+ <link rel="stylesheet" type="text/css" href="pop-upwindows/lib/sweet-alert.css"/>
+ <link rel="stylesheet" type="text/css" href="css/popup.css"/>
+ <script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+ <script src="js/login.js"></script>
+ <script src="pop-upwindows/lib/sweet-alert.js" type="text/javascript" charset="utf-8"></script>
+ <script src="js/myCookie.js" type="text/javascript" charset="utf-8"></script>
+ <script src="js/popup.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+<div class="materialContainer">
+	<div class="box">
+		<div class="title">登录</div>
+		<div class="input">
+			<label for="name">用户名</label>
+			<input type="text" name="username" id="name">
+			<span class="spin"></span>
+		</div>
+		<div class="input">
+			<label for="pass">密码</label>
+			<input type="password" name="password" id="pass">
+			<span class="spin"></span>
+		</div>
+		<div class="button login">
+			<button id="login">
+				<span>登录</span>
+			</button>
+		</div>
+		<a href="javascript:" class="pass-forgot">忘记密码？</a>
+	</div>
+
+	<div class="overbox">
+		<div class="material-button alt-2">
+			<span class="shape"></span>
+		</div>
+		<div class="title">注册</div>
+		<div class="input">
+			<label for="regname" id="regnameone">用户名</label>
+			<input type="text" name="regname" id="regname" >
+			<span class="spin"></span>
+		</div>
+		<div class="input">
+			<label for="regpass">密码</label>
+			<input type="password" name="regpass" id="regpass">
+			<span class="spin"></span>
+		</div>
+		<div class="input">
+			<label for="reregpass">确认密码</label>
+			<input type="password" name="reregpass" id="reregpass">
+			<span class="spin"></span>
+		</div>
+		<div class="button" id="register">
+			<button>
+				<span>注册</span>
+			</button>
+		</div>
+	</div>
+
+</div>
+<script type="text/javascript">
+	var Popup = new Popup();
+	$("#login").click(function(){
+		if($("#name").val()){}
+		$.ajax({
+			type: "get",
+			url: "http://localhost:8082/findUser",
+			data: {
+				username: $("#name").val(),
+				password: $("#pass").val()
+			},
+			dataType: "json",
+			success: function(result) {
+				if (result.state == 1) {
+					Popup.alert('系统提示', '用户名密码错误')
+				}else if(result.state==0){
+					setCookie('identity',result.identity);
+					setCookie('name',$("#name").val());
+					window.location.href ="index.html";
+				}
+				if(result.identity==null){
+					Popup.alert('系统提示', '联系管理员登录授权');
+				}
+			},
+			error: function() {
+				Popup.alert('系统提示', '系统异常')
+			}
+		});
+	});
+
+	$("#register").click(function(){
+		var A = $("#regname").val();
+		var B = $("#reregpass").val();
+		if( A==null||A==undefined||A==""){    
+			Popup.toast('用户名不能为空', 3);
+		}else if(B==null||B==undefined||B==""){
+			Popup.toast('密码不能为空', 3);
+		}else if($("#regpass").val()!=$("#reregpass").val()){
+			$("#regpass").val(null);
+			$("#reregpass").val(null);
+			Popup.toast('两次输入密码不一致', 3);
+		}else{
+			$.ajax({
+				type: "get",
+				url: "http://localhost:8082/insertUser",
+				data: {
+					username: $("#regname").val(),
+					password: $("#regpass").val()
+				},
+				dataType: "json",
+				success: function(result) {
+					if (result.state == 1) {
+						Popup.toast('注册成功', 3);
+					}else if(result.state==0){
+						Popup.alert('系统提示', '网络异常')
+					}
+
+				},
+				error: function() {
+					Popup.alert('系统提示', '系统异常')
+				}
+			});
+		}
+	});
+	$("#regname").mouseout(function(){
+		$.ajax({
+			type: "get",
+			url: "http://localhost:8082/finduserByusrname",
+			data: {
+				username: $("#regname").val(),
+			},
+			dataType: "json",
+			success: function(result) {
+				if (result.state == 1) {
+					Popup.toast('用户名已存在', 3);
+					$("#register").val(null);
+				}
+			},
+			error: function() {
+				Popup.alert('系统异常');
+			}
+		});
+	});
+	$(function(){ 
+	　　 $("#name").val(null),
+		 $("#pass").val(null)
+	　　});
+</script>
+</body>
+</html>

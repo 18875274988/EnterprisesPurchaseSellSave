@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<link rel="shortcut icon" href="images/favicon.ico"/>
+				<link rel="bookmark" href="images/favicon.ico"/>
+				<link rel="stylesheet" type="text/css" href="css/base.css">
+				<link rel="stylesheet" type="text/css" href="css/iconfont.css">
+				<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+				<link rel="stylesheet" type="text/css" href="layui/css/layui.css">
+			    <!--[if lt IE 9]>
+			      	<script src="framework/html5shiv.min.js"></script>
+			      	<script src="framework/respond.min.js"></script>
+			    <![endif]-->
+				<script type="text/javascript" src="layui/layui.js"></script>
+				<!-- 滚动条插件 -->
+				<link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.css">
+				<script src="framework/jquery-ui-1.10.4.min.js"></script>
+				<script src="framework/jquery.mousewheel.min.js"></script>
+				<script src="framework/jquery.mCustomScrollbar.min.js"></script>
+				<script src="js/myCookie.js" type="text/javascript" charset="utf-8"></script>
+				<script src="js/vue.min.js" type="text/javascript" charset="utf-8"></script>
+				<!-- 公共样式 结束 -->
+				
+				<link rel="stylesheet" type="text/css" href="css/frameStyle.css">
+				<script type="text/javascript" src="framework/frame.js" ></script>
+	</head>
+	<body>
+		<!-- 左侧菜单 - 开始 -->
+				<div class="frameMenu">
+				    <div class="logo" style="width: 270px; height: 90px;">
+							<div class="div1">
+							<div class="div2">
+								<img src="images/logo.png"/>
+							</div>
+				        <div class="logoText">
+				            <h1>经销存管理系统</h1>
+				            <p>www.eps.com</p>
+				        </div>
+								</div>
+				    </div>
+				    <div class="menu">
+				        <ul>
+				        	<li id="a">
+				                <a class="menuFA"  href="goods_list.html" target="rightMain"><i class="iconfont icon-shangpin left"></i>销售下单</a>
+				            </li>
+				        	<li id="b">
+				                <a class="menuFA" href="stockout_list.html" target="rightMain"><i class="iconfont icon-huojian left"></i>缺货单状态</a>
+				           	</li>
+							<li id="j">
+							    <a class="menuFA" href="productPricing.html" target="rightMain"><i class="iconfont icon-xiugaimima1 left"></i>货物定价</a>
+							</li>
+				        	<li id="c">
+				                <a class="menuFA" href="purchase_list.html" target="rightMain"><i class="iconfont icon-liuliangyunpingtaitubiao03 left"></i>采购任务</a>
+				            </li>
+							<li id="i">
+								<a class="menuFA" href="productLibrary_list.html" target="rightMain"><i class="iconfont icon-xiangxiajiantoucuxiao left"></i>商品库</a>
+							 </li>
+				        	<li id="d">
+				                <a class="menuFA" href="Inbound_list.html" target="rightMain"><i class="iconfont icon-xiangxiajiantoucuxiao left"></i>商品入库单</a>
+				            </li>
+				        	<li id="e">
+				                <a class="menuFA" href="Outbound_list.html" target="rightMain"><i class="iconfont icon-xiangshangjiantoucuxiao left"></i>商品出库单</a>
+				           	</li>
+				        	<li id="f">
+				                <a class="menuFA" href="payment_list.html" target="rightMain"><i class="iconfont icon-ai-wallet left"></i>来料付款单</a>
+				           	</li>
+				        	<li id="g">
+				                <a class="menuFA" href="gathering_list.html" target="rightMain"><i class="iconfont icon-caiwu left"></i>销售收款单</a>
+				           	</li>
+							<li id="h">
+							    <a class="menuFA"  href="userList.html" target="rightMain"><i class="iconfont icon-yonghu1 left"></i>用户管理</a>
+							</li>
+				        </ul>
+				    </div>
+				</div>
+				<!-- 左侧菜单 - 结束 -->
+	</body>
+	<script type="text/javascript">
+		var identity=getCookie("identity");
+		if(identity==1){
+			$("#c").hide();
+			$("#d").hide();
+			$("#e").hide();
+			$("#f").hide();
+			$("#g").hide();
+			$("#h").hide();
+			$("#i").hide();
+			$("#j").hide();
+		}else if(identity==2){
+			$("#a").hide();
+			$("#b").hide();
+			$("#d").hide();
+			$("#e").hide();
+			$("#f").hide();
+			$("#g").hide();
+			$("#h").hide();
+			$("#i").hide();
+			$("#j").hide();
+		}else if(identity==3){
+			$("#a").hide();
+			$("#b").hide();
+			$("#c").hide();
+			$("#f").hide();
+			$("#g").hide();
+			$("#h").hide();
+			$("#j").hide();
+		}else if(identity==4){
+			$("#a").hide();
+			$("#b").hide();
+			$("#c").hide();
+			$("#d").hide();
+			$("#e").hide();
+			$("#h").hide();
+			$("#i").hide();
+		}
+	</script>
+</html>

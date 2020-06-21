@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="css/popup.css"/>
+		<link rel="stylesheet" type="text/css" href="layui/css/layui.css"/>
+		<!-- 滚动条插件 -->
+		<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/popup.js" type="text/javascript" charset="utf-8"></script>
+		<script src="layui/layui.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/vue.min.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body>
+  <div class="layui-form-item">
+    <label class="layui-form-label">商品名称</label>
+    <div class="layui-input-block">
+      <input type="text" id="productName" autocomplete="off" placeholder="请输入" class="layui-input">
+    </div>
+  </div>
+ <div class="layui-form-item">
+   <label class="layui-form-label">商品数量</label>
+   <div class="layui-input-block">
+     <input type="text" id="productCount" autocomplete="off" placeholder="请输入(1.5斤)" class="layui-input">
+   </div>
+ </div>
+ <div class="layui-form-item">
+   <label class="layui-form-label">商品来源</label>
+   <div class="layui-input-block">
+     <input type="text" id="productFrom" autocomplete="off" placeholder="请输入" class="layui-input">
+   </div>
+ </div>
+ <div class="layui-form-item">
+   <label class="layui-form-label">商品种类</label>
+   <div id="categoryList" style="margin-left: 110px;">
+   <select v-model='optionesValue' style="width: 180px;height: 35px;" id="categoryNameSelect">
+   	<option v-for="item in listArray" :value="item.categoryName">{{item.categoryName}}</option>
+   </select>
+   </div>
+ </div>
+ <div class="layui-form-item">
+   <label class="layui-form-label">采购价格</label>
+   <div class="layui-input-block">
+     <input type="text" id="productPurchasePrice" autocomplete="off" placeholder="请输入" class="layui-input">
+   </div>
+ </div>
+  <div class="layui-form-item">
+    <button class="layui-btn" id="sumb" lay-submit="" lay-filter="demo2" style="margin-left: 50%;">确定添加</button>
+  </div>
+</body>
+	</body><!-- body-end  -->
+	<script type="text/javascript">
+		var Popup = new Popup();
+		$("#sumb").click(function(){
+		var productNameVal =  $("#productName").val()
+		var productCountVal =  $("#productCount").val()
+		var productFromVal =  $("#productFrom").val()
+		var productCategoryVal =  $("#categoryNameSelect").val()
+		var productPurchasePriceVal =  $("#productPurchasePrice").val()
+		$.ajax({
+			url: 'http://localhost:8082/addProduct',
+			type: 'get',
+			data: {
+				productName:productNameVal,
+				productCount:productCountVal,
+				productFrom:productFromVal,
+				productCategory:productCategoryVal,
+				productPurchasePrice:productPurchasePriceVal
+			},
+			dataType: 'json',
+			success:function(res){
+					if(res==0){
+						Popup.alert("系统提示","输入不能为空");
+					}else{
+						Popup.alert("系统提示","添加成功");
+						window.location.href="productLibrary_list.html";
+					}
+			},
+			error:
+			function(){
+				Popup.alert("系统提示","系统异常");
+			}
+		})
+		})
+		new Vue({
+					el: '#categoryList',
+					        data: {
+											optionesValue:1,
+					            listArray: []
+					        },
+					        created: function () {
+								var selftwo=this;
+					            $.ajax({
+					                url: 'http://localhost:8082/findAllCategroy',
+					                type: 'get',
+					                data: {},
+					                dataType: 'json'
+					            }).then(function (res) {
+					                selftwo.listArray = res;
+					            }).fail(function () {
+								alert("系统异常");
+					            })
+					        }	
+			    });	
+	</script>
+</html>

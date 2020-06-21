@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+				<link rel="stylesheet" type="text/css" href="css/iconfont.css">
+				<link rel="stylesheet" type="text/css" href="layui/css/layui.css">
+				<!-- 滚动条插件 -->
+				<script src="js/myCookie.js" type="text/javascript" charset="utf-8"></script>
+				<script src="js/vue.min.js" type="text/javascript" charset="utf-8"></script>
+				<!-- 公共样式 结束 -->
+				<link rel="stylesheet" type="text/css" href="css/frameStyle.css">
+	</head>
+	<body onload="startTime()">
+			<!-- 头部栏 - 开始 -->
+			<div style="width: 100%;height: 100%;">
+			<div class="frameTop">
+				<img class="jt" src="images/top_jt.png"/>
+				<div class="topMenu">
+					<ul>
+						<li><a href="javascript:void(0)" id="showname"><i class="iconfont icon-yonghu1"></i>{{name}}</a></li>
+						<li><a href="modify_password.html" target="rightMain"><i class="iconfont icon-xiugaimima"></i>修改密码</a></li>
+						<li><a href="login.html" target="index"><i class="iconfont icon-084tuichu"></i>注销</a></li>
+					</ul>
+				</div>
+			</div>
+			<div style="background-color: #afafaf; width: 100%;height: 40px;margin-top: 40px;"></div>
+			</div>
+			<div class="shijian" style=" width: 100%;height: 80px;position: absolute;color: white;background-color: #1c1c1c;">
+			当前时间：<font color="white"><span id="nowDateTimeSpan"></span></font>
+			</div>
+			<script src="js/time.js" type="text/javascript" charset="utf-8"></script>
+			<!-- 头部栏 - 结束 -->
+	</body>
+	<script type="text/javascript">
+		var cookiename=getCookie("name");
+		new Vue({
+			el:'#showname',/* 选择元素 */
+			data:{/* 保存数据或者吃初始化数据 */
+				name:cookiename
+			},
+		});
+	</script>
+</html>

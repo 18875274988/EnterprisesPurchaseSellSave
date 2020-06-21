@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="css/base.css">
+		<link rel="stylesheet" type="text/css" href="css/iconfont.css">
+		<link rel="stylesheet" type="text/css" href="layui/css/layui.css">
+		<link rel="stylesheet" type="text/css" href="css/popup.css"/>
+		<script type="text/javascript" src="layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.css">
+		<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/vue.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/popup.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/myCookie.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body>
+			<div class="cBody">
+				<div style="margin-left: 40%;" id="isnone">
+				<div class="layui-form-item">
+				<div class="layui-input-inline">
+					<input type="text" placeholder="请输入客户名字" class="layui-input" id="clientName">
+				</div>
+				</div>
+				<div class="layui-form-item">
+				<div class="layui-input-inline">
+					<input type="text" placeholder="请输入客户电话" class="layui-input" id="clientTel">
+				</div>
+				</div>
+				<div class="layui-form-item">
+				<div class="layui-input-inline">
+					<input type="text" placeholder="请输入客户身份证号码" class="layui-input" id="clientNo">
+				</div>
+				</div>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<button id="ensureone" class="layui-btn" style="width: 100px;">确定</button>
+				</div>
+			<div id="orderList" style="display: none;">
+			<table class="layui-table" id="isHidden">
+				<thead>
+				<tr>
+						<th>序号</th>
+						<th>商品名字</th>
+						<th>下单数目</th>
+						<th>小计/元</th>
+				</tr>
+				</thead>
+				<tbody  id="orderList">
+					 <tr v-for="site in sites">
+					          	<td v-text="site.productId" style="display: none;"></td>
+					          	<td v-text="sites.indexOf(site)+1"></td>
+					          	<td v-text="site.productName"></td>
+					          	<td><input type="text"class="layui-input" placeholder="可修改订单数目	" v-model="site.count" /></td>
+					          	<td v-text="site.productPrice*(site.count)"></td>
+					 </tr>
+				</tbody>
+			</table>
+			<div id="" style="margin-left: 40%; ">
+			<span  id="totalPrice" style="font-size: 20px;color: red;">合计：{{totalPrice}}元</span>
+			<button id="ensuretwo" class="layui-btn" style="width: 100px;" @click="sumOrder(sites)">确认订单</button>
+			</div>
+			</div>
+			</div>
+		</body><!-- body-end  -->
+		
+		<script type="text/javascript">
+			var Popup = new Popup();
+			var nameval = getCookie("name");
+			var vm = new Vue({
+			        el: '#orderList',
+			        data: {
+			            sites: [],
+						totalPrice,
+			        },
+					watch:{
+						sites:{
+							handler:function(newVal){
+							var totalPriceVal=0;
+							for(var i=0;i<newVal.length;i++){
+								totalPriceVal+=newVal[i].count*newVal[i].productPrice;
+							}
+								vm.$data.totalPrice=totalPriceVal;
+							},
+							deep:true
+						}
+					},
+					
+			        created: function () {
+			　　　　　　//为了在内部函数能使用外部函数的this对象，要给它赋值了一个名叫self的变量。
+			            var self = this;
+			            $.ajax({
+			                url: 'http://localhost:8082/selectTemporary',
+			                type: 'get',
+			                data: {
+								accountName:nameval
+							},
+			                dataType: 'json'
+			            }).then(function (res) {
+			　　　　　　　　　　//把从json获取的数据赋值给数组
+			                self.sites = res;
+							//计算总价
+							var coutprice=0;
+							for(var i=0;i<res.length;i++){
+								coutprice+=res[i].productPrice*res[i].count;
+							}
+							self.totalPrice=coutprice;
+			            }).fail(function () {
+							Popup.alert("系统提示","系统异常");
+			            })
+			        },
+			    });
+				$("#ensureone").click(function(){
+					var clientTelVal = $("#clientTel").val();
+					var clientNoVal = $("#clientNo").val();
+					if($("#clientName").val()=='' && $("#clientTel").val()=='' && $("#clientNo").val()==''){
+						Popup.alert("系统提示","客户信息不能为空");
+					}else{
+						$.getJSON('http://localhost:8082/checkParameter', {clientTel:clientTelVal,
+						clientNo:clientNoVal},
+						function(res){
+						     if(res==1){
+								 $("#isnone").hide();
+								 $("#orderList").show();
+							 }else{
+								 Popup.toast("身份证或电话号码格式错误",2);
+								 $("#clientName").val(null);
+								 $("#clientTel").val(null);
+								 $("#clientNo").val(null);
+							 }
+						});
+					}
+					
+				})
+				
+				function sumOrder(sites){
+					var clientNameVal = $("#clientName").val();
+					var clientTelVal = $("#clientTel").val();
+					var clientNoVal = $("#clientNo").val();
+					var totalPriceVal =$("#totalPrice").text();
+					$.ajax({
+					    url: 'http://localhost:8082/startOrder',
+					    type: 'post',
+							data: JSON.stringify({
+							totalPrice:totalPriceVal,
+							clientName:clientNameVal,
+							clientTel:clientTelVal,
+							clientNo:clientNoVal,								
+							productList:sites,
+								}),
+							contentType:"application/json",
+					    dataType: 'json',
+						success:function(res){
+							if(res==1){
+								Popup.alert("系统提示","缺货商品正在采购",function(){
+									window.location.href="goods_list.html";
+								})
+							}else{
+								  window.location.href="goods_list.html";
+							}
+						},
+						error:function(){
+							Popup.alert("系统提示","系统错误");
+						}
+						
+				});
+			}
+		</script>
+</html>

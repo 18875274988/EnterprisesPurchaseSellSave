@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="css/base.css">
+		<link rel="stylesheet" type="text/css" href="css/iconfont.css">
+		<link rel="stylesheet" type="text/css" href="layui/css/layui.css">
+		<link rel="stylesheet" type="text/css" href="css/popup.css"/>
+		<link rel="stylesheet" type="text/css" href="css/alert.css"/>
+		<script type="text/javascript" src="layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.css">
+		<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/vue.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/popup.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body>
+			<div class="cBody">
+				<button id="sumbOrder" class="layui-btn" style="float: right; margin-right: 5px;margin-bottom: 10px;"><a href="payment_list.html" style="color: white;">>>>点击返回</a></button>
+			<div id="productList">
+			<table class="layui-table">
+				<thead>
+				<tr>
+						<th>序号</th>
+						<th>商品名称</th>
+						<th>商品数量</th>
+						<th>采购单价</th>
+						<th>小计</th>
+				</tr>
+				</thead>
+				<tbody  id="purchaseNote">
+					 <tr v-for="site in sites">
+					          	<td v-text="sites.indexOf(site)+1"></td>
+					          	<td v-text="site.productName"></td>
+					          	<td v-text="site.productCount"></td>
+											<td v-text="site.productPurchasePrice"></td>
+											<td v-text="site.subTotal"></td>
+					  </tr>
+				</tbody>
+			</table>
+			<div id="" style="margin-left: 40%; ">
+			<span  id="totalPrice" style="font-size: 20px;color: red;">合计：{{totalPrice}}元</span>
+			</div>
+			</div>
+			</div>
+			
+		</body><!-- body-end  -->
+		<script type="text/javascript">
+			var orderIdVal = JSON.parse(localStorage.id);
+			localStorage.removeItem('id');
+			var Popup = new Popup();
+			var vm = new Vue({
+			        el: '#productList',
+			        data: {
+			            sites: [],
+									totalPrice:0,
+			        },
+			        created: function () {
+			　　　　　　//为了在内部函数能使用外部函数的this对象，要给它赋值了一个名叫self的变量。
+			            var self = this;
+			            $.ajax({
+			                url: 'http://localhost:8082/findPurchaseProductList',
+			                type: 'get',
+			                data: {
+												orderId:orderIdVal
+							},
+			                dataType: 'json'
+			            }).then(function (res) {
+			　　　　　　　　　　//把从json获取的数据赋值给数组
+			                self.sites = res;
+											for(var i=0;i<self.sites.length;i++){
+											self.totalPrice+=self.sites[i].subTotal;
+											}
+			            }).fail(function () {
+										Popup.alert("系统提示","系统异常");
+			            })
+			        },
+			    });
+
+		</script>
+		
+</html>

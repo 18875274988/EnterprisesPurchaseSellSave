@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="css/base.css">
+		<link rel="stylesheet" type="text/css" href="css/iconfont.css">
+		<link rel="stylesheet" type="text/css" href="layui/css/layui.css">
+		<link rel="stylesheet" type="text/css" href="css/popup.css"/>
+		<link rel="stylesheet" type="text/css" href="css/alert.css"/>
+		<script type="text/javascript" src="layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.css">
+		<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/vue.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/popup.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body>
+			<div class="cBody">
+			<div id="productList">
+			<table class="layui-table">
+				<thead>
+				<tr>
+						<th>序号</th>
+						<th>商品名称</th>
+						<th>商品数量</th>
+						<th>采购价格</th>
+				</tr>
+				</thead>
+				<tbody  id="purchaseNote">
+					 <tr v-for="site in sites">
+					          	<td v-text="sites.indexOf(site)+1"></td>
+					          	<td v-text="site.productName"></td>
+					          	<td v-text="site.productCount"></td>
+											<td>
+												<input type="text" class="layui-input" placeholder="采购价/元(不要单位)" v-model="site.productPurchasePrice">
+											</td>
+					  </tr>
+				</tbody>
+			</table>
+			<button class="layui-btn" style="width: 100px; margin-left: 50%;" @click="sumbPurchase(sites)">确认</button>
+			</div>
+			</div>
+			<!-- 客户信息弹框 -->
+			<div class="modal addfade" id="addmodal">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h4>采购商信息</h4>
+						</div>
+						<div class="modal-body">
+							<p>
+								姓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名：<input type="text" id="name"/>
+							</p>
+							<p>
+								电&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;话：<input type="text" id="tel"/>
+							</p>
+							<p>
+								身份证号：<input type="text" id="no"/>
+							</p>
+						</div>
+						<div class="modal-footer">
+							<button class="addbtn_ok">确定</button>
+							<button class="addbtn_no">取消</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+		</body><!-- body-end  -->
+		<script type="text/javascript">
+			var Popup = new Popup();
+			var purchaseOrderIdval = JSON.parse(localStorage.id);
+			localStorage.removeItem('id');
+			new Vue({
+					el: '#productList',
+					        data: {
+					            sites: [],
+					        },
+					        created: function () {
+					　　　　　　//为了在内部函数能使用外部函数的this对象，要给它赋值了一个名叫self的变量。
+					            var self = this;
+					            $.ajax({
+					                url: 'http://localhost:8082/findPurchaseById',
+					                type: 'get',
+					                data: {purchaseOrderId:purchaseOrderIdval},
+					                dataType: 'json'
+					            }).then(function (res) {
+					                self.sites = res;
+					            }).fail(function () {
+								Popup.alert("系统异常");
+					            })
+					        }	
+			    });
+					function sumbPurchase(sites){
+				$(".addfade").fadeIn(300)
+				$(document).on("click",".addbtn_ok",function(){
+						$('#addmodal').find("input").each(function(){
+						})
+						var supplierNameVal = $("#name").val();
+						var supplierTelVal = $("#tel").val();
+						var supplierNoVal = $("#no").val();
+						var reguser = /^[+-]?\d+(\.\d+)?$|^$|^(\d+|\-){7,}$/;
+								var a=0;
+								for(var i=0;i<sites.length;i++){
+									var Priceval = sites[i].productPurchasePrice;
+									var matchresult= reguser.test(Priceval);
+									if(!matchresult && Priceval!=null){
+										Popup.alert("系统提示","数量输入格式有误，不要单位")
+										a+=1;
+										break;
+									}
+							}
+							if(a==0){
+								var arr=[];
+								for(var i=0;i<sites.length;i++){
+									var purchaseProdect = {};
+									if(sites[i].productPurchasePrice!=null){
+										purchaseProdect.purchaseOrderId=sites[i].purchaseOrderId;
+										purchaseProdect.productPurchasePrice=sites[i].productPurchasePrice;
+										purchaseProdect.productName=sites[i].productName;
+										arr.push(purchaseProdect);
+									}
+								}
+						$.ajax({
+											type: "post",
+											url: "http://localhost:8082/insertPurchasePriceById",
+											data: JSON.stringify({
+												purchaseProductList:arr,
+												supplierName:supplierNameVal,
+												supplierTel:supplierTelVal,
+												supplierNo:supplierNoVal
+											}),
+											contentType:"application/json",
+											dataType: "json",
+											success: function(res) {
+													if(res==-2){
+														Popup.alert("系统提示","电话或身份证号码格式错误");
+													}else{
+														window.location.href="purchase_list.html";
+														$(".addfade").fadeOut(300)
+													}
+											},
+											error: function() {
+												Popup.alert('系统提示', '系统异常')
+											}
+										});
+								  }	
+					})
+					$(document).on("click",".addbtn_no",function(){
+						$(".addfade").fadeOut(300)
+				})
+		}
+		</script>
+		
+</html>

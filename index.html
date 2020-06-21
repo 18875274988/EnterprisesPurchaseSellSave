@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>销售存管理系统</title>
+		<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/myCookie.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+		<frameset cols="20%,*" frameborder="0" name="index" noresize="noresize">
+					<frame src="left.html" frameborder="0" noresize="noresize">
+					<frameset rows="20%,*,10%"frameborder="0" noresize="noresize">
+						<frame src="top.html" frameborder="0" noresize="noresize">
+						<frame src="right.html" frameborder="0" name="rightMain" noresize="noresize">
+						<frame src="_bottom.html" frameborder="0" noresize="noresize">
+					</frameset>
+				</frameset>
+	<body>
+		<script type="text/javascript">
+			var identity=getCookie("identity");
+			console.log(identity);
+			if(identity==1){
+				$("#c").hide();
+				$("#d").hide();
+				$("#e").hide();
+				$("#f").hide();
+				$("#g").hide();
+				$("#h").hide();
+			}else if(identity==2){
+				$("#a").hide();
+				$("#b").hide();
+				$("#d").hide();
+				$("#e").hide();
+				$("#f").hide();
+				$("#g").hide();
+				$("#h").hide();
+				$("#i").hide();
+			}else if(identity==3){
+				$("#a").hide();
+				$("#b").hide();
+				$("#c").hide();
+				$("#f").hide();
+				$("#g").hide();
+				$("#h").hide();
+			}else if(identity==4){
+				$("#a").hide();
+				$("#b").hide();
+				$("#c").hide();
+				$("#d").hide();
+				$("#e").hide();
+				$("#h").hide();
+				$("#i").hide();
+			}
+		</script>
+	</body>
+</html>
